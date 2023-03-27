@@ -1,1 +1,11 @@
 # multi-model-regularization
+
+Information theoretic model selection allows to extract metrics of relative model importance from model likelihood estimations. From a set of N models, we can then identify which model is the best for predictions on the basis of it having the lowest information theoretic criterion (e.g. AIC). Importantly, such metrics penalize models with too many parameters, thereby limitting the risk of overfitting. Although appealing, this procedure however neglects uncertainty in model importance ranking, which results from a finite sample size. 
+
+To account for model importance uncertainty, we can calculate model IT weights, as the probability of each model to be the best model for predictions. If a model has a weight of e.g. > 0.95, there is a good chance that it is the best model in the set for predictions. If however no model weight in the set exceeds e.g. 0.3, then there is uncertainty in model ranking and about which model to use for predictions.
+
+Luckily, we can perform so called multimodel inference. This consists of using estimates from several models with good enough fit together, in order to build an average model which supposedly performs better at predicting new data than any other model in the set. This is done by averaging estimated parameters across all considered models, weighted by model weights. When applying so-called 'full averaging', predictors which do not appear in models have their estimated parameter set to 0, such that, if a predictor is absent from models with large weights, its averaged parameter will naturally shrink towards 0. 
+
+Such a shrinkage is reminiscent of other statistical methods intended to penalize estimated parameter values to avoid overfitting, such as regularization methods like Ridge, Lasso, or Elastic net regressions. Contrary to IT model averaging, such methods involve hyperparameter optimization during cross validation, a potentially time and ressource expensive algorithmic method.
+
+Our goal here is therefore to evaluate the relative benefits of IT multimodel inference and regularization techniques to avoid overfitting during model selection. Beyond simple curiosity about methods relative performance, the use of IT model averaging instead of regularization mais significantly increase model training time.
