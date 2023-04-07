@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import itertools as iter
 import statsmodels.api as sm
 
@@ -140,7 +139,7 @@ def multi_model_inf(df, response, variables, combinations="all"):
     cols = ["model", "intercept"]
     cols.extend(variables)
     cols.extend(["AIC", "deltaAIC"])
-    models = pd.DataFrame(columns=cols)
+    models = pd.DataFrame(columns=cols, dtype="float")
     models["model"] = [list(p) for p in model_variables]
     for i, predictors in enumerate(models["model"]):
         y = df[response]
@@ -149,18 +148,16 @@ def multi_model_inf(df, response, variables, combinations="all"):
         model = sm.OLS(y, X).fit()
         models.loc[i, "AIC"] = model.aic
         models.loc[i, "intercept"] = model.params["const"]
-        models.loc[i, model.params.index.drop("const").tolist()] = model.params.drop(
-            "const"
-        ).tolist()
+        predictors = model.params.drop("const")
+        models.loc[i, predictors.index] = predictors.values
     # get deltaAIC values
     models = models.sort_values(by="AIC").reset_index(drop=True)
     models.loc[0, "deltaAIC"] = 0
     for i in range(1, models.shape[0]):
         models.loc[i, "deltaAIC"] = models.loc[i, "AIC"] - models.loc[0, "AIC"]
     # get AIC weights
-    models["AIC weight"] = [np.exp(d) for d in (-0.5 * models["deltaAIC"])] / sum(
-        [np.exp(d) for d in (-0.5 * models["deltaAIC"])]
-    )
+    exp_aic = np.exp(-0.5 * models["deltaAIC"])
+    models["AIC weight"] = exp_aic / np.sum(exp_aic)
     return models
 
 
